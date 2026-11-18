@@ -1,0 +1,30 @@
+name: Deadline reminders
+
+on:
+  schedule:
+    - cron: '13 23 * * *' # 매일 08:13 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 법정 검사·계약 기한 확인 · 텔레그램
+        run: npm run inspections:daily
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

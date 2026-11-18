@@ -1,0 +1,26 @@
+{
+  "name": "kyc-oilfield-ops",
+  "private": true,
+  "type": "module",
+  "description": "만땅 — 주유소 운영 장부: 수집 잡 + 대시보드",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "policy:weekly": "node --env-file-if-exists=.env --import tsx jobs/policy-weekly.ts",
+    "policy:sample": "NEWS_FIXTURE=jobs/fixtures/sample-news.json DATA_DIR=.sample-data node --import tsx jobs/policy-weekly.ts",
+    "prices:daily": "node --env-file-if-exists=.env --import tsx jobs/prices-daily.ts",
+    "land:weekly": "node --env-file-if-exists=.env --import tsx jobs/land-weekly.ts",
+    "inspections:daily": "node --env-file-if-exists=.env --import tsx jobs/inspections-daily.ts",
+    "typecheck": "tsc --noEmit",
+    "markets": "node --env-file-if-exists=.env --import tsx jobs/markets.ts",
+    "urea": "node --env-file-if-exists=.env --import tsx jobs/urea.ts",
+    "applications": "node --env-file-if-exists=.env --import tsx jobs/applications.ts",
+    "demo-export": "node --env-file-if-exists=.env --import tsx jobs/demo-export.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

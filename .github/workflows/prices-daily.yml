@@ -1,0 +1,67 @@
+name: Competitor prices
+
+on:
+  schedule:
+    - cron: '17 */4 * * *' # 4시간마다: 01·05·09·13·17·21시 17분 KST (오피넷 갱신 주기에 맞춤)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: '최근 수집 캐시(3시간)를 무시하고 오피넷을 다시 호출'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 오피넷 반경 가격 수집 · 알림
+        run: npm run prices:daily
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
+          FORCE: ${{ inputs.force }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: 국제유가·환율·전국 평균 판매가
+        if: always()
+        run: npm run markets
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
+
+      - name: 요소수 주변 시세·품절 감시
+        if: always()
+        run: npm run urea
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: 로그인 전 데모용 데이터 (이름 가림)
+        if: always()
+        run: npm run demo-export
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+
+      - name: 새 주유소 등록 신청 알림 (사이트 관리자)
+        if: always()
+        run: npm run applications
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

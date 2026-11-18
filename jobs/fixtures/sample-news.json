@@ -1,0 +1,34 @@
+[
+  {
+    "title": "[샘플] 정부, 폐업 주유소 토양정화·철거비 지원 확대 검토",
+    "url": "https://example.com/sample-1",
+    "source": "example.com",
+    "publishedAt": "2026-11-14T01:00:00.000Z",
+    "description": "테스트용 가상 기사입니다. 실제 뉴스가 아닙니다.",
+    "keyword": "주유소 폐업 지원"
+  },
+  {
+    "title": "[샘플] 주유소 부지 내 전기차 급속충전기 설치 보조금 공고",
+    "url": "https://example.com/sample-2",
+    "source": "example.com",
+    "publishedAt": "2026-11-13T03:00:00.000Z",
+    "description": "테스트용 가상 기사입니다. 실제 뉴스가 아닙니다.",
+    "keyword": "주유소 전기차 충전소 전환"
+  },
+  {
+    "title": "[샘플] 광주 광산구 도로 확장 계획 주민설명회",
+    "url": "https://example.com/sample-3",
+    "source": "example.com",
+    "publishedAt": "2026-11-12T05:00:00.000Z",
+    "description": "테스트용 가상 기사입니다. 실제 뉴스가 아닙니다.",
+    "keyword": "광주 주유소"
+  },
+  {
+    "title": "[샘플] 정부, 폐업 주유소 토양정화 철거비 지원 확대 검토 (중복)",
+    "url": "https://example.com/sample-1-dup",
+    "source": "example.org",
+    "publishedAt": "2026-11-14T00:30:00.000Z",
+    "description": "중복 제거 테스트용 가상 기사입니다.",
+    "keyword": "주유소 전업 지원"
+  }
+]

@@ -1,0 +1,35 @@
+name: Weekly land value
+
+on:
+  schedule:
+    - cron: '47 22 * * 0' # 매주 월요일 07:47 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 실거래가 · 개발 뉴스 수집 · 요약
+        run: npm run land:weekly
+        env:
+          SUPABASE_DATA_KEY: ${{ secrets.SUPABASE_DATA_KEY }}
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          # AI 요약: Supabase 에 등록한 GEMINI_API_KEY 를 ai-summarize 함수로 경유 (GitHub 에 따로 넣을 필요 없음)
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

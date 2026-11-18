@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1e2a33"/>
+  <!-- 주유기 -->
+  <rect x="13" y="12" width="26" height="42" rx="5" fill="#f2c230"/>
+  <rect x="18" y="18" width="16" height="10" rx="2" fill="#1e2a33"/>
+  <rect x="9" y="50" width="34" height="5" rx="2.5" fill="#f2c230"/>
+  <!-- 호스와 노즐 -->
+  <path d="M39 22 h5 a4 4 0 0 1 4 4 v16 a3.5 3.5 0 0 0 7 0 V24 l-5 -6" fill="none" stroke="#f2c230" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 기름 한 방울 -->
+  <path d="M26 33 c0 0 -5 6 -5 9 a5 5 0 0 0 10 0 c0 -3 -5 -9 -5 -9 z" fill="#1e2a33"/>
+</svg>
