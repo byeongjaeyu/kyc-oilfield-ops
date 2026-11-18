@@ -363,7 +363,7 @@ function TopBar({
           )}
           {ctx &&
             (ctx.roles.length > 1 ? (
-              <span className="seg seg-sm" role="group" aria-label="어느 역할로 볼지" data-tour="role">
+              <span className="seg seg-sm tb-role" role="group" aria-label="어느 역할로 볼지" data-tour="role">
                 {ctx.roles.map((r) => (
                   <button key={r} type="button" aria-pressed={r === ctx.role} onClick={() => ctx.onRole(r)}>
                     {ROLE_KO[r]}
@@ -371,16 +371,16 @@ function TopBar({
                 ))}
               </span>
             ) : (
-              <span className="chip" data-tour="role">
+              <span className="chip tb-role" data-tour="role">
                 {ctx.selfOperated && ctx.role === 'owner' ? '직접 운영' : ROLE_KO[ctx.role]}
-                {ctx.isManager && ' · 관리자'}
+                {ctx.isManager && <span className="tb-long"> · 관리자</span>}
               </span>
             ))}
         </div>
         <nav className="tb-right" aria-label="계정">
           <ChatButton />
           {ctx?.isManager && (
-            <button type="button" className="tb-btn" aria-pressed={ctx.tab === 'settings'} onClick={() => ctx.onTab('settings')} data-tour="settings">
+            <button type="button" className="tb-btn" aria-label="주유소 설정" aria-pressed={ctx.tab === 'settings'} onClick={() => ctx.onTab('settings')} data-tour="settings">
               <svg viewBox="0 0 20 20" aria-hidden width="18" height="18">
                 <path
                   fill="currentColor"

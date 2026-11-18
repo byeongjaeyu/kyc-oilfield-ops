@@ -1429,3 +1429,22 @@ input[type='file']::file-selector-button:hover { border-color: var(--slate); }
   .chat-form { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .chat-btn .tb-btn-label { display: none; }
 }
+
+/* ── 휴대폰 상단 바: 한 줄 안에 — 주유소 이름이 줄어들고, 역할·버튼은 그대로 ── */
+.tb-left { flex: 1 1 auto; }
+.tb-right { flex: 0 0 auto; }
+.tb-role { flex: 0 0 auto; white-space: nowrap; }
+.seg.tb-role { flex-wrap: nowrap; }
+@media (max-width: 560px) {
+  .topbar-inner { gap: 6px; padding: 0 10px 0 4px; }
+  .tb-left { gap: 4px; }
+  .tb-right { gap: 2px; }
+  .tb-station { flex: 1 1 auto; }
+  .tb-station select { width: 100%; max-width: 100%; padding-left: 6px; padding-right: 22px; font-size: 14.5px; }
+  .tb-title { flex: 1 1 auto; min-width: 0; font-size: 14.5px; padding-left: 6px; }
+  .seg-sm.tb-role button { padding: 0 7px; font-size: 12.5px; }
+  .chip.tb-role { padding: 0 8px; font-size: 12px; }
+  .tb-btn { padding: 0 8px; }
+  .tb-btn .tb-btn-label { display: none; }
+  .avatar { width: 34px; height: 34px; font-size: 14px; }
+}
