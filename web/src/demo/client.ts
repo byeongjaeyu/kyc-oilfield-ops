@@ -13,9 +13,10 @@ type Row = Record<string, any>;
 type Db = Record<string, Row[]>;
 type Res = { data: any; error: { message: string; code?: string } | null; count?: number | null };
 
-const STORE_KEY = 'demo:db:v4';
-const NO_ID = new Set(['station_members', 'station_permissions', 'station_invites', 'fuel_settings', 'fuel_tanks', 'daily_closes', 'routine_checks', 'site_config', 'bank_webhooks', 'calendar_feeds', 'profiles', 'supply_settlements']);
+const STORE_KEY = 'demo:db:v5';
+const NO_ID = new Set(['station_members', 'station_permissions', 'station_invites', 'fuel_settings', 'fuel_tanks', 'daily_closes', 'routine_checks', 'site_config', 'bank_webhooks', 'calendar_feeds', 'profiles', 'supply_settlements', 'chat_profiles']);
 const CONFLICT: Record<string, string[]> = {
+  chat_profiles: ['user_id'],
   station_members: ['station_id', 'user_id', 'role'],
   station_permissions: ['station_id', 'role', 'area'],
   fuel_settings: ['station_id'],
@@ -120,6 +121,15 @@ function beforeInsert(d: Db, table: string, row: Row): Res | null {
     it.stock = after;
     it.updated_at = now;
   }
+  if (table === 'chat_messages') {
+    const nick = d.chat_profiles?.find((x) => x.user_id === DEMO_UID)?.nickname;
+    if (!nick) return { data: null, error: { message: '대화명을 먼저 정해 주세요.' } };
+    row.user_id = DEMO_UID;
+    row.nickname = nick;
+    row.is_admin = false;
+    row.body = String(row.body ?? '').trim();
+  }
+  if (table === 'chat_profiles') row.user_id = DEMO_UID;
   if (table === 'supply_settlements') {
     row.station_id = d.supply_vendors.find((x) => x.id === row.vendor_id)?.station_id ?? row.station_id;
     row.settled_at = row.settled_at ?? now;

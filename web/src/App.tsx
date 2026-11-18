@@ -25,6 +25,7 @@ import type { LandLatest, MarketLatest, PolicyIndexEntry, PolicyItem, PolicyRepo
 import { Loading } from './Loading';
 import { PasswordSheet, useHasPassword } from './PasswordSheet';
 import { LegalPage, type LegalKind } from './Legal';
+import { ChatButton, ChatPanel } from './ChatPanel';
 
 /** 폴사인 아래 보조 간판 = 탭. 선택된 간판에 불이 들어온다 */
 const TABS = [
@@ -377,6 +378,7 @@ function TopBar({
             ))}
         </div>
         <nav className="tb-right" aria-label="계정">
+          <ChatButton />
           {ctx?.isManager && (
             <button type="button" className="tb-btn" aria-pressed={ctx.tab === 'settings'} onClick={() => ctx.onTab('settings')} data-tour="settings">
               <svg viewBox="0 0 20 20" aria-hidden width="18" height="18">
@@ -404,6 +406,7 @@ function TopBar({
         </nav>
       </div>
       <PasswordSheet open={pwOpen} onClose={() => setPwOpen(false)} />
+      <ChatPanel me={me} />
     </header>
   );
 }
