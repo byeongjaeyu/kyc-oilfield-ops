@@ -54,7 +54,7 @@ async function fromYahoo(symbol: string): Promise<{ price: number; asOf: string;
   for (const host of ['query1', 'query2']) {
     try {
       const res = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1d`, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; oilfield-ops/1.0)', Accept: 'application/json' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; manddang/1.0)', Accept: 'application/json' },
         signal: AbortSignal.timeout(20_000),
       });
       if (!res.ok) throw new Error(`Yahoo ${symbol} ${res.status}`);

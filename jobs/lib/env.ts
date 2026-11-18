@@ -14,7 +14,7 @@ export const env = {
   dataGoKrKey: get('DATA_GO_KR_KEY'),
   /** 캐시(최소 수집 간격)를 무시하고 강제로 수집 */
   force: ['1', 'true'].includes(get('FORCE').toLowerCase()),
-  dashboardUrl: get('DASHBOARD_URL', 'https://byeongjaeyu.github.io/kyc-oilfield-ops/'),
+  dashboardUrl: get('DASHBOARD_URL', 'https://byeongjaeyu.github.io/manddang/'),
   /** 테스트용: 뉴스 수집 대신 이 JSON 파일의 기사 목록을 사용 */
   newsFixture: get('NEWS_FIXTURE'),
   /** 결과 JSON 저장 위치 (기본: data) */

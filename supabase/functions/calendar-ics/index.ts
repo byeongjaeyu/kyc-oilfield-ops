@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   const list: Ev[] = [];
   for (const e of events ?? []) {
     list.push({
-      uid: `contract-${e.id}@oilfield-ops`,
+      uid: `contract-${e.id}@manddang`,
       date: e.date,
       summary: `[계약] ${e.title}`,
       description: e.note ?? '',
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
   }
   for (const i of inspections ?? []) {
     list.push({
-      uid: `inspection-${i.id}@oilfield-ops`,
+      uid: `inspection-${i.id}@manddang`,
       date: i.due!,
       summary: `[검사] ${i.name} 기한`,
       description: i.party ? `${i.party} 담당` : '',
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//oilfield-ops//ko',
+    'PRODID:-//manddang//ko',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     `X-WR-CALNAME:${station?.name ?? '주유소'} 일정`,
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
   return new Response(lines.map(fold).join('\r\n') + '\r\n', {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'inline; filename="oilfield.ics"',
+      'Content-Disposition': 'inline; filename="manddang.ics"',
       'Cache-Control': 'private, max-age=900',
     },
   });

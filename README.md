@@ -10,7 +10,7 @@ GitHub Actions 가 정해진 시간에 데이터를 수집·요약해서 **Supab
 | 임대인 (owner) | 전부 + 회원 관리 (항상) |
 | 임차인 (tenant) | 메뉴별 보기·수정을 임대인이 회원 관리 화면에서 체크로 정함 (`role_permissions` 표). 지금은 전부 허용 |
 
-대시보드: https://byeongjaeyu.github.io/kyc-oilfield-ops/
+대시보드: https://byeongjaeyu.github.io/manddang/
 
 소개 영상 (20초, 예시 데이터): [docs/media/promo.mp4](docs/media/promo.mp4)
 
@@ -140,7 +140,7 @@ npm run dev                 # 대시보드 (Supabase 에 로그인해서 봄)
 - 알림은 주유소별 텔레그램 채팅으로. 데모 주유소와 업계 정책 리포트는 개발자 채팅(`TELEGRAM_CHAT_ID`)으로도 간다
 - Edge Function `opinet-search`(등록 신청 화면의 주유소 검색)에는 Supabase Secrets 의 `OPINET_API_KEY` 가 필요하다. 없으면 신청자가 이름·주소를 직접 입력하고 관리자가 오피넷 ID 를 넣는다
 - Supabase → Authentication → URL Configuration 의 Site URL 과 Redirect URLs 에
-  `https://byeongjaeyu.github.io/kyc-oilfield-ops/` 가 있어야 로그인 링크가 이 사이트로 돌아옴
+  `https://byeongjaeyu.github.io/manddang/` 가 있어야 로그인 링크가 이 사이트로 돌아옴
 
 ## ⚠️ 보안 원칙
 

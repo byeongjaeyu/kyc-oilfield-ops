@@ -26,7 +26,7 @@ export async function rest<T>(path: string, init: RequestInit & { prefer?: strin
   if (res.status === 401) {
     // 값은 숨기고 형식만 알려 줌
     const kind = KEY.startsWith('sb_secret_') ? 'sb_secret_ 키' : KEY.startsWith('sb_publishable_') ? 'publishable(공개) 키 — 서비스 키가 아님' : KEY.startsWith('eyJ') ? 'JWT 형식 키' : '알 수 없는 형식(키가 아닌 값일 수 있음)';
-    throw new Error(`Supabase 키가 거부됐습니다 (${kind}, ${KEY.length}자). oilfield-ops 프로젝트의 Secret key(sb_secret_…) 또는 service_role 키를 SUPABASE_DATA_KEY 에 넣어 주세요. 응답: ${text.slice(0, 200)}`);
+    throw new Error(`Supabase 키가 거부됐습니다 (${kind}, ${KEY.length}자). Supabase 프로젝트의 Secret key(sb_secret_…) 또는 service_role 키를 SUPABASE_DATA_KEY 에 넣어 주세요. 응답: ${text.slice(0, 200)}`);
   }
   if (!res.ok) throw new Error(`Supabase ${res.status} ${path}: ${text.slice(0, 300)}`);
   return (text ? JSON.parse(text) : null) as T;
