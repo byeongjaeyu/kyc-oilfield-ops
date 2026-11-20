@@ -13,7 +13,7 @@ type Row = Record<string, any>;
 type Db = Record<string, Row[]>;
 type Res = { data: any; error: { message: string; code?: string } | null; count?: number | null };
 
-const STORE_KEY = 'demo:db:v5';
+const STORE_KEY = 'demo:db:v6';
 const NO_ID = new Set(['station_members', 'station_permissions', 'station_invites', 'fuel_settings', 'fuel_tanks', 'daily_closes', 'routine_checks', 'site_config', 'bank_webhooks', 'calendar_feeds', 'profiles', 'supply_settlements', 'chat_profiles']);
 const CONFLICT: Record<string, string[]> = {
   chat_profiles: ['user_id'],

@@ -84,6 +84,7 @@ export function makeFixtures(): Record<string, Row[]> {
   const contract: Row = {
     id: CONTRACT,
     station_id: DEMO_SID,
+    kind: 'lease',
     title: '주유소 부지 임대차 계약',
     tenant_name: '(주)한빛에너지',
     start_date: start,
@@ -120,6 +121,68 @@ export function makeFixtures(): Record<string, Row[]> {
     ev('임대료 인상', nextIncrease, '임대료 인상 (3%)', '월 3,000,000원 → 3,090,000원'),
     ev('갱신 통지 마감', noticeBy, '갱신 통지 마감', '만기 90일 전까지 갱신 여부 통지'),
     ev('만기', end, '주유소 부지 임대차 계약 만기'),
+  ];
+
+  // ── 직접 운영 주유소의 다른 계약: 정유사 공급, 세차기 렌탈 ──
+  const C_SUPPLY = '0de30000-0000-4000-8000-00000000c002';
+  const C_RENTAL = '0de30000-0000-4000-8000-00000000c003';
+  const sStart = monthDay(-22, 1);
+  const sEnd = monthDay(14, 0);
+  const rStart = monthDay(-14, 10);
+  const rEnd = monthDay(22, 9);
+  const minus = (d: string, n: number) => new Date(Date.parse(`${d}T00:00:00Z`) - n * DAY).toISOString().slice(0, 10);
+  const base = { station_id: DEMO_SID, increase_rate: null, increase_every_months: null, next_increase_date: null, increase_rule: '', restoration: '', restoration_items: [], file_path: null, status: 'confirmed', payer_names: [], created_at: at(20), updated_at: at(20) };
+  const others: Row[] = [
+    {
+      ...base,
+      id: C_SUPPLY,
+      kind: 'supply',
+      title: '정유사 상표·공급 계약',
+      tenant_name: '한빛정유(주) 남부지사',
+      start_date: sStart,
+      end_date: sEnd,
+      deposit: 200_000_000,
+      monthly_rent: null,
+      vat_included: null,
+      rent_due_day: null,
+      auto_renew: true,
+      renewal_notice_days: 60,
+      quotes: { renewal_notice_days: '계약 만료 60일 전까지 어느 일방이 서면으로 해지 의사를 밝히지 않으면 같은 조건으로 1년 연장된다.' },
+      file_name: '상표사용및공급계약서.pdf',
+      note: '월 최소 구매량 60,000L, 미달이 석 달 이어지면 공급가 할인 축소. 계약 기간 중 다른 정유사 제품 판매 금지. 담보는 근저당 2억.',
+    },
+    {
+      ...base,
+      id: C_RENTAL,
+      kind: 'rental',
+      title: '자동세차기 렌탈',
+      tenant_name: '(주)반짝세차기',
+      start_date: rStart,
+      end_date: rEnd,
+      deposit: null,
+      monthly_rent: 1_450_000,
+      vat_included: false,
+      rent_due_day: 10,
+      auto_renew: false,
+      renewal_notice_days: 30,
+      increase_rate: 2,
+      increase_every_months: 12,
+      next_increase_date: monthDay(2, 10),
+      increase_rule: '매년 2% 인상',
+      quotes: { monthly_rent: '월 렌탈료는 일금 일백사십오만원(부가세 별도)으로 한다.' },
+      file_name: '세차기렌탈계약서.jpg',
+      note: '중도 해지 시 남은 기간 렌탈료의 30%를 위약금으로 낸다. 정기 점검 월 1회 포함.',
+    },
+  ];
+  const ev2 = (cid: string, kind: string, date: string, title: string, note = '') => ({ id: id('e'), station_id: DEMO_SID, contract_id: cid, kind, date, title, note, auto: true, created_at: at(20) });
+  const otherEvents = [
+    ev2(C_SUPPLY, '계약 시작', sStart, '정유사 상표·공급 계약 시작'),
+    ev2(C_SUPPLY, '갱신 통지 마감', minus(sEnd, 60), '정유사 상표·공급 계약 갱신 통지 마감', '만기 60일 전까지 해지 통지 없으면 1년 자동 연장'),
+    ev2(C_SUPPLY, '만기', sEnd, '정유사 상표·공급 계약 만기'),
+    ev2(C_RENTAL, '계약 시작', rStart, '자동세차기 렌탈 시작'),
+    ev2(C_RENTAL, '임대료 인상', monthDay(2, 10), '자동세차기 렌탈 요금·단가 인상', '매년 2% 인상'),
+    ev2(C_RENTAL, '갱신 통지 마감', minus(rEnd, 30), '자동세차기 렌탈 갱신 통지 마감', '만기 30일 전까지 갱신 여부 통지'),
+    ev2(C_RENTAL, '만기', rEnd, '자동세차기 렌탈 만기'),
   ];
 
   // ── 임대료: 3달 전부터 다음 달까지 ──
@@ -359,8 +422,9 @@ export function makeFixtures(): Record<string, Row[]> {
     ],
     station_invites: [{ station_id: DEMO_SID, email: 'accountant@example.com', role: 'owner', is_manager: false, invited_by: DEMO_UID, created_at: at(3) }],
     station_permissions: permissions,
-    contracts: [contract],
-    contract_events: events,
+    // 데모 주유소는 직접 운영이라 계약 탭에는 공급·렌탈 계약이, 임대차는 '임대 중'으로 바꾸면 입금 확인에 쓰임
+    contracts: [...others, contract],
+    contract_events: [...otherEvents, ...events],
     rent_charges: charges,
     bank_transactions: transactions,
     bank_webhooks: [],

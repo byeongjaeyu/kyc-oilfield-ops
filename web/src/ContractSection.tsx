@@ -17,8 +17,30 @@ interface ContractEvent {
   auto: boolean;
 }
 
+export type ContractKind = 'lease' | 'supply' | 'rental' | 'service' | 'etc';
+export const KIND_KO: Record<ContractKind, string> = {
+  lease: '임대차',
+  supply: '정유사 공급',
+  rental: '렌탈·리스',
+  service: '유지보수·보험',
+  etc: '기타',
+};
+/** 계약 종류에 따라 칸 이름을 바꿈 (임대차가 아니면 월세·원상복구 대신 요금·상대 업체) */
+const L = (k: ContractKind | undefined) => {
+  const lease = (k ?? 'lease') === 'lease';
+  return {
+    lease,
+    party: lease ? '임차인' : '상대 업체',
+    deposit: lease ? '보증금' : '보증금·담보',
+    monthly: lease ? '월 임대료' : '월 요금',
+    due: lease ? '매월 지급일' : '매월 결제일',
+    increase: lease ? '임대료 인상' : '요금·단가 인상',
+  };
+};
+
 interface Contract {
   id: string;
+  kind?: ContractKind;
   title: string;
   tenant_name: string;
   start_date: string | null;
@@ -45,7 +67,7 @@ interface Contract {
 
 type Editable = Omit<Contract, 'id' | 'file_path' | 'file_name' | 'status' | 'contract_events'>;
 const EDIT_KEYS: Array<keyof Editable> = [
-  'title', 'tenant_name', 'start_date', 'end_date', 'deposit', 'monthly_rent', 'vat_included', 'rent_due_day', 'auto_renew',
+  'kind', 'title', 'tenant_name', 'start_date', 'end_date', 'deposit', 'monthly_rent', 'vat_included', 'rent_due_day', 'auto_renew',
   'renewal_notice_days', 'increase_rate', 'increase_every_months', 'next_increase_date', 'increase_rule', 'restoration',
   'restoration_items', 'quotes', 'note',
 ];
@@ -72,7 +94,7 @@ function dTag(date: string) {
   return { text: d < 0 ? `${-d}일 지남` : d === 0 ? 'D-DAY' : `D-${d}`, tone, d };
 }
 
-export function ContractSection({ me, stationId, canWrite }: { me: Profile; stationId: string; canWrite: boolean }) {
+export function ContractSection({ me, stationId, canWrite, selfOperated = false }: { me: Profile; stationId: string; canWrite: boolean; selfOperated?: boolean }) {
   const [contracts, setContracts] = useState<Contract[] | null>(null);
   const [feeds, setFeeds] = useState<Array<{ token: string; created_at: string }>>([]);
   const [editing, setEditing] = useState<string | null>(null);
@@ -123,7 +145,7 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
       const created = must<{ id: string }>(
         await supabase
           .from('contracts')
-          .insert({ station_id: stationId, title: file.name.replace(/\.[^.]+$/, ''), file_path: path, file_name: file.name })
+          .insert({ station_id: stationId, kind: selfOperated ? 'etc' : 'lease', title: file.name.replace(/\.[^.]+$/, ''), file_path: path, file_name: file.name })
           .select('id')
           .single(),
       );
@@ -148,6 +170,7 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
         if (k === 'quotes' || k === 'note') continue;
         if (f[k] !== undefined && f[k] !== null) patch[k] = f[k];
       }
+      if (patch.kind && !Object.keys(KIND_KO).includes(String(patch.kind))) delete patch.kind;
       patch.quotes = { ...((f.quotes as object) ?? {}), _uncertain: (f.uncertain as string[]) ?? [] };
       if (f.notes) patch.note = String(f.notes);
       must(await supabase.from('contracts').update(patch).eq('id', created.id));
@@ -202,7 +225,9 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
           </ol>
         </>
       ) : (
-        <p className="readout">아직 확정한 계약이 없습니다. 계약서를 올리면 만기·갱신 통지 마감·임대료 인상일이 여기에 생깁니다.</p>
+        <p className="readout">
+          아직 확정한 계약이 없습니다. 임대차, 정유사 공급계약, 세차기·단말기 렌탈, 유지보수·보험처럼 기한이 있는 계약서를 올리면 만기·갱신 통지 마감·인상일이 여기에 생기고 미리 알려 드립니다.
+        </p>
       )}
 
       {canWrite && (
@@ -226,7 +251,7 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
           disabled={!!busy}
           onClick={() =>
             run('추가하는 중', async () => {
-              const created = must<{ id: string }>(await supabase.from('contracts').insert({ station_id: stationId }).select('id').single());
+              const created = must<{ id: string }>(await supabase.from('contracts').insert({ station_id: stationId, kind: selfOperated ? 'etc' : 'lease', title: selfOperated ? '' : '주유소 임대차 계약' }).select('id').single());
               setEditing(created.id);
             })
           }
@@ -254,6 +279,7 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
             <div className="contract-head">
               <h3 className="insp-name">
                 {c.title || '제목 없음'}
+                <span className="kind-tag">{KIND_KO[c.kind ?? 'lease']}</span>
                 <span className={`status-tag ${c.status}`}>{c.status === 'confirmed' ? '확정' : '검토 전'}</span>
               </h3>
               <p className="insp-meta">
@@ -261,11 +287,13 @@ export function ContractSection({ me, stationId, canWrite }: { me: Profile; stat
                 {dot(c.start_date)} ~ {dot(c.end_date)}
                 {c.end_date && `, 만기 ${dTag(c.end_date).text}`}
               </p>
-              <p className="insp-meta">
-                보증금 {manWon(c.deposit)}, 월 {manWon(c.monthly_rent)}
-                {c.vat_included != null && (c.vat_included ? ' (부가세 포함)' : ' (부가세 별도)')}
-                {c.rent_due_day && `, 매월 ${c.rent_due_day}일`}
-              </p>
+              {(c.deposit != null || c.monthly_rent != null) && (
+                <p className="insp-meta">
+                  {[c.deposit != null && `${L(c.kind).deposit} ${manWon(c.deposit)}`, c.monthly_rent != null && `월 ${manWon(c.monthly_rent)}`].filter(Boolean).join(', ')}
+                  {c.monthly_rent != null && c.vat_included != null && (c.vat_included ? ' (부가세 포함)' : ' (부가세 별도)')}
+                  {c.rent_due_day && `, 매월 ${c.rent_due_day}일`}
+                </p>
+              )}
             </div>
             <div className="form-actions">
               {canWrite && (
@@ -442,8 +470,21 @@ function ContractForm({
       <fieldset>
         <legend>기본</legend>
         <div className="cf-grid">
+          {Field({
+            k: 'kind',
+            label: '계약 종류',
+            children: (
+              <select value={f.kind ?? 'lease'} onChange={(e) => set('kind', e.target.value as ContractKind)}>
+                {(Object.keys(KIND_KO) as ContractKind[]).map((k) => (
+                  <option key={k} value={k}>
+                    {KIND_KO[k]}
+                  </option>
+                ))}
+              </select>
+            ),
+          })}
           {Field({ k: 'title', label: '계약 이름', children: <input value={f.title} onChange={(e) => set('title', e.target.value)} /> })}
-          {Field({ k: 'tenant_name', label: '임차인', children: <input value={f.tenant_name} onChange={(e) => set('tenant_name', e.target.value)} /> })}
+          {Field({ k: 'tenant_name', label: L(f.kind).party, children: <input value={f.tenant_name} onChange={(e) => set('tenant_name', e.target.value)} /> })}
           {Field({ k: 'start_date', label: '계약 시작일', children: <input type="date" value={f.start_date ?? ''} onChange={(e) => set('start_date', e.target.value || null)} /> })}
           {Field({ k: 'end_date', label: '만기일', children: <input type="date" value={f.end_date ?? ''} onChange={(e) => set('end_date', e.target.value || null)} /> })}
         </div>
@@ -454,12 +495,12 @@ function ContractForm({
         <div className="cf-grid">
           {Field({
             k: 'deposit',
-            label: `보증금 (원)${f.deposit ? ` — ${manWon(f.deposit)}` : ''}`,
+            label: `${L(f.kind).deposit} (원)${f.deposit ? ` — ${manWon(f.deposit)}` : ''}`,
             children: <input inputMode="numeric" value={f.deposit ?? ''} onChange={(e) => set('deposit', num(e.target.value))} />,
           })}
           {Field({
             k: 'monthly_rent',
-            label: `월 임대료 (원)${f.monthly_rent ? ` — ${manWon(f.monthly_rent)}` : ''}`,
+            label: `${L(f.kind).monthly} (원)${f.monthly_rent ? ` — ${manWon(f.monthly_rent)}` : ''}`,
             children: <input inputMode="numeric" value={f.monthly_rent ?? ''} onChange={(e) => set('monthly_rent', num(e.target.value))} />,
           })}
           {Field({
@@ -475,7 +516,7 @@ function ContractForm({
           })}
           {Field({
             k: 'rent_due_day',
-            label: '매월 지급일',
+            label: L(f.kind).due,
             children: <input type="number" min={1} max={31} value={f.rent_due_day ?? ''} onChange={(e) => set('rent_due_day', num(e.target.value))} />,
           })}
         </div>
@@ -506,7 +547,7 @@ function ContractForm({
       </fieldset>
 
       <fieldset>
-        <legend>임대료 인상</legend>
+        <legend>{L(f.kind).increase}</legend>
         <div className="cf-grid">
           {Field({ k: 'increase_rate', label: '인상률 (%)', children: <input inputMode="decimal" value={f.increase_rate ?? ''} onChange={(e) => set('increase_rate', num(e.target.value))} /> })}
           {Field({
@@ -523,6 +564,7 @@ function ContractForm({
         </div>
       </fieldset>
 
+      {L(f.kind).lease && (
       <fieldset>
         <legend>원상복구</legend>
         {Field({ k: 'restoration', label: '원상복구 조항 요약', wide: true, children: <textarea rows={2} value={f.restoration} onChange={(e) => set('restoration', e.target.value)} /> })}
@@ -539,6 +581,7 @@ function ContractForm({
           ),
         })}
       </fieldset>
+      )}
 
       {Field({ k: 'note', label: '특이 조항·메모', wide: true, children: <textarea rows={3} value={f.note} onChange={(e) => set('note', e.target.value)} /> })}
 

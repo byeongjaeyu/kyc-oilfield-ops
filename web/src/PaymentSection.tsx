@@ -105,6 +105,7 @@ export function PaymentSection({
         .select('id,title,tenant_name,payer_names,payments_tracked_from')
         .eq('station_id', stationId)
         .eq('status', 'confirmed')
+        .eq('kind', 'lease')
         .order('start_date'),
     ]);
     if (c.error) setError(c.error.message);

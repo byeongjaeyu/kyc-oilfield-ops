@@ -1448,3 +1448,4 @@ input[type='file']::file-selector-button:hover { border-color: var(--slate); }
   .tb-btn .tb-btn-label { display: none; }
   .avatar { width: 34px; height: 34px; font-size: 14px; }
 }
+.kind-tag { display: inline-flex; align-items: center; height: 22px; margin-left: 8px; padding: 0 8px; font-size: 12px; font-weight: 600; color: var(--slate); background: rgba(255, 176, 32, 0.16); border: 1px solid rgba(255, 176, 32, 0.45); border-radius: 999px; vertical-align: 2px; white-space: nowrap; }

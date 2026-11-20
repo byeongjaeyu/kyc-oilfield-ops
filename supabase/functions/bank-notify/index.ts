@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
     .from('contracts')
     .select('tenant_name, payer_names')
     .eq('station_id', hook.station_id)
-    .eq('status', 'confirmed');
+    .eq('status', 'confirmed')
+    .eq('kind', 'lease');
   const names = (contracts ?? []).flatMap((c) => [c.tenant_name, ...(c.payer_names ?? [])]).filter(Boolean);
   if (!payerMatches(tx.payer, names)) {
     return json({ ok: true, stored: false, parsed: tx, message: '입금자명이 계약의 입금자명과 맞지 않아 저장하지 않음' });

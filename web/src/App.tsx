@@ -39,7 +39,8 @@ const TABS = [
   { id: 'payment', name: '입금 확인' },
 ] as const;
 /** 임대 중일 때만 있는 메뉴 */
-const LEASE_TABS: readonly string[] = ['contract', 'payment'];
+/** 임대 중일 때만 보이는 탭 (계약 일정은 공급·렌탈 계약도 있어 늘 보임) */
+const LEASE_TABS: readonly string[] = ['payment'];
 type TabId = (typeof TABS)[number]['id'] | 'settings' | 'feedback' | 'counter';
 
 /** 탭 → 권한 영역. null 이면 영역과 무관 (주유소 설정은 관리자, 의견은 누구나) */
@@ -778,7 +779,7 @@ function Dashboard({
             <p className="readout">이 계정에 열려 있는 메뉴가 없습니다. 주유소 관리자에게 권한을 요청해 주세요.</p>
           )}
           {tab === 'inspection' && <InspectionSection me={me} stationId={sid} canWrite={perms.inspections.write} />}
-          {tab === 'contract' && <ContractSection me={me} stationId={sid} canWrite={perms.contracts.write} />}
+          {tab === 'contract' && <ContractSection me={me} stationId={sid} canWrite={perms.contracts.write} selfOperated={station.operation === 'self'} />}
           {tab === 'payment' && (
             <PaymentSection me={me} stationId={sid} canWrite={perms.payments.write} canEditContracts={perms.contracts.write} />
           )}
